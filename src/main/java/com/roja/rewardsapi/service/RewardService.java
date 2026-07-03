@@ -1,85 +1,84 @@
 package com.roja.rewardsapi.service;
-
-import com.roja.rewardsapi.dto.RewardResponse;
 import com.roja.rewardsapi.entity.Transaction;
+import com.roja.rewardsapi.dto.RewardResponse;
+//import com.roja.rewardsapi.service.Transaction;
+import com.roja.rewardsapi.exception.CustomerNotFoundException;
+import com.roja.rewardsapi.repository.TransactionRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.concurrent.CompletableFuture;
-import org.springframework.scheduling.annotation.Async;
-
-import java.time.Month;
-import java.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
-
+@RequiredArgsConstructor
+@Slf4j
 public class RewardService {
 
-    public RewardResponse calculateRewards(Long customerId, int months)  {
+    private final TransactionRepository transactionRepository;
 
-        List<Transaction> transactions = List.of(
-                new Transaction(1L, 101L, 120.0,
-                        java.time.LocalDate.of(2026, 1, 10)),
-                new Transaction(2L, 101L, 75.0,
-                        java.time.LocalDate.of(2026, 2, 15)),
-                new Transaction(3L, 101L, 200.0,
-                        java.time.LocalDate.of(2026, 3, 20))
-        );
+    public RewardResponse calculateRewards(Long customerId, int months) {
+
+        if (months <= 0) {
+            throw new IllegalArgumentException("Months must be greater than zero");
+        }
+
+        LocalDate fromDate = LocalDate.now().minusMonths(months);
+
+        List<Transaction> transactions =
+                transactionRepository.findByCustomerIdAndTransactionDateAfter(
+                        customerId, fromDate);
+
+        if (transactions.isEmpty()) {
+            throw new CustomerNotFoundException(
+                    "No transactions found for customer " + customerId);
+        }
+
+        log.info("Calculating rewards for customer {}", customerId);
 
         Map<String, Integer> monthlyRewards = new HashMap<>();
-
-        int total = 0;
+        int totalRewards = 0;
 
         for (Transaction transaction : transactions) {
 
             int points = calculatePoints(transaction.getAmount());
 
-            String month =
-                    Month.from(transaction.getTransactionDate()).name();
+            String month = transaction.getTransactionDate()
+                    .getMonth()
+                    .name();
 
             monthlyRewards.put(
                     month,
-                    monthlyRewards.getOrDefault(month, 0) + points
-            );
+                    monthlyRewards.getOrDefault(month, 0) + points);
 
-            total += points;
+            totalRewards += points;
         }
 
-        return new RewardResponse(
-                customerId,
-                monthlyRewards,
-                total
-        );
+        RewardResponse response = new RewardResponse();
+        response.setCustomerId(customerId);
+        response.setMonthlyRewards(monthlyRewards);
+        response.setTotalRewards(totalRewards);
+
+        return response;
     }
 
-    public int calculatePoints(double amount) {
+    public int calculatePoints(BigDecimal amount) {
 
         int points = 0;
 
-        if (amount > 100) {
-            points += (int) ((amount - 100) * 2);
+        if (amount.compareTo(BigDecimal.valueOf(100)) > 0) {
+            points += amount.subtract(BigDecimal.valueOf(100)).intValue() * 2;
             points += 50;
-        } else if (amount > 50) {
-            points += (int) (amount - 50);
+        } else if (amount.compareTo(BigDecimal.valueOf(50)) > 0) {
+            points += amount.subtract(BigDecimal.valueOf(50)).intValue();
         }
 
         return points;
-
     }
-    @Async
-    public CompletableFuture<List<Transaction>> fetchTransactions() {
-
-        return CompletableFuture.completedFuture(
-                List.of(
-                        new Transaction(1L,101L,120.0,
-                                LocalDate.of(2026,1,10))
-                )
-        );
-    }
-
-
-    private static final Logger logger =
-            LoggerFactory.getLogger(RewardService.class);
 }

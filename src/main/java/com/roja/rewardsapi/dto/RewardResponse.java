@@ -7,10 +7,9 @@ public class RewardResponse {
     private Long customerId;
     private Map<String, Integer> monthlyRewards;
     private Integer totalRewards;
-    private String customerName;
-    private String email;
-    private int totalTransactions;
-    private double totalAmountSpent;
+
+    public RewardResponse() {
+    }
 
     public RewardResponse(Long customerId,
                           Map<String, Integer> monthlyRewards,
@@ -24,11 +23,23 @@ public class RewardResponse {
         return customerId;
     }
 
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
+    }
+
     public Map<String, Integer> getMonthlyRewards() {
         return monthlyRewards;
     }
 
+    public void setMonthlyRewards(Map<String, Integer> monthlyRewards) {
+        this.monthlyRewards = monthlyRewards;
+    }
+
     public Integer getTotalRewards() {
         return totalRewards;
+    }
+
+    public void setTotalRewards(Integer totalRewards) {
+        this.totalRewards = totalRewards;
     }
 }
