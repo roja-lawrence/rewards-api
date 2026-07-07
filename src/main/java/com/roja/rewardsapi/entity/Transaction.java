@@ -45,4 +45,15 @@ public class Transaction {
     public LocalDate getTransactionDate() {
         return transactionDate;
     }
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public void setTransactionDate(LocalDate transactionDate) {
+        this.transactionDate = transactionDate;
+    }
 }
