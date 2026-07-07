@@ -5,6 +5,7 @@ import com.roja.rewardsapi.entity.Transaction;
 import com.roja.rewardsapi.repository.TransactionRepository;
 import com.roja.rewardsapi.service.RewardService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,8 +62,8 @@ public class RewardServiceTest {
     void testCalculateRewards_SingleTransaction() {
 
         Transaction transaction = new Transaction();
-        transaction.setCustomerId(1);
-        transaction.setAmount(120);
+        transaction.setCustomerId(1L);
+        transaction.setAmount(BigDecimal.valueOf(120));
         transaction.setTransactionDate(LocalDate.of(2026, 1, 15));
 
         List<Transaction> transactions = List.of(transaction);
@@ -73,6 +74,7 @@ public class RewardServiceTest {
         assertEquals(90, response.getTotalRewards());
     }
 
+    @Nested
     @WebMvcTest(RewardController.class)
     class RewardControllerTest {
 

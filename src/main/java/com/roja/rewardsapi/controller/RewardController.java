@@ -27,6 +27,6 @@ public class RewardController {
             @Max(12)
             int months) {
 
-        return rewardService.calculateRewards(customerId, months);
+        return rewardService.calculateRewards(customerId);
     }
 }

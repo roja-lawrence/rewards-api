@@ -7,8 +7,6 @@ import com.roja.rewardsapi.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -23,8 +21,9 @@ public class RewardService {
 
     private final TransactionRepository transactionRepository;
 
-    public RewardResponse calculateRewards(Long customerId, int months) {
+    public RewardResponse calculateRewards(Long customerId) {
 
+        long months = 0;
         if (months <= 0) {
             throw new IllegalArgumentException("Months must be greater than zero");
         }
