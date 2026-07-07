@@ -1,12 +1,13 @@
 package com.roja.rewardsapi.service;
-import com.roja.rewardsapi.entity.Transaction;
 import com.roja.rewardsapi.dto.RewardResponse;
-//import com.roja.rewardsapi.service.Transaction;
-import com.roja.rewardsapi.exception.CustomerNotFoundException;
+import com.roja.rewardsapi.entity.Transaction;
+
+import com.roja.rewardsapi.exception.TransactionNotFoundException;
 import com.roja.rewardsapi.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,16 +15,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Service
+
 @RequiredArgsConstructor
 @Slf4j
 public class RewardService {
 
     private final TransactionRepository transactionRepository;
 
-    public RewardResponse calculateRewards(Long customerId) {
+    public RewardResponse calculateRewards(Long customerId, long months) {
 
-        long months = 0;
+       // long months = 0;
         if (months <= 0) {
             throw new IllegalArgumentException("Months must be greater than zero");
         }
@@ -35,7 +36,7 @@ public class RewardService {
                         customerId, fromDate);
 
         if (transactions.isEmpty()) {
-            throw new CustomerNotFoundException(
+            throw new TransactionNotFoundException(
                     "No transactions found for customer " + customerId);
         }
 
@@ -48,13 +49,16 @@ public class RewardService {
 
             int points = calculatePoints(transaction.getAmount());
 
-            String month = transaction.getTransactionDate()
-                    .getMonth()
-                    .name();
+            DateTimeFormatter formatter =
+                    DateTimeFormatter.ofPattern("MMM-yy", Locale.ENGLISH);
+
+            String monthYear = transaction.getTransactionDate()
+                    .format(formatter)
+                    .toUpperCase();
 
             monthlyRewards.put(
-                    month,
-                    monthlyRewards.getOrDefault(month, 0) + points);
+                    monthYear,
+                    monthlyRewards.getOrDefault(monthYear, 0) + points);
 
             totalRewards += points;
         }

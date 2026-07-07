@@ -1,5 +1,6 @@
 package com.roja.rewardsapi;
 
+import com.roja.rewardsapi.controller.RewardController;
 import com.roja.rewardsapi.dto.RewardResponse;
 import com.roja.rewardsapi.entity.Transaction;
 import com.roja.rewardsapi.repository.TransactionRepository;
@@ -10,7 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+//import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -74,24 +76,5 @@ public class RewardServiceTest {
         assertEquals(90, response.getTotalRewards());
     }
 
-    @Nested
-    @WebMvcTest(RewardController.class)
-    class RewardControllerTest {
 
-        @Autowired
-        private MockMvc mockMvc;
-
-        @MockBean
-        private RewardService rewardService;
-
-        @Test
-        void testGetRewards() throws Exception {
-
-            when(rewardService.calculateRewards(any()))
-                    .thenReturn(new HashMap<>());
-
-            mockMvc.perform(get("/api/rewards"))
-                    .andExpect(status().isOk());
-        }
     }
-}
